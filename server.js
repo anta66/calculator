@@ -1,19 +1,28 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-
 const app = express();
-app.use(bodyParser.json());
 
-app.post("/webhooks/azure-ad-users", (req, res) => {
-    if (req.query && req.query.validationToken) {
-        // ✅ Respond with the validation token as plain text (Microsoft expects this)
-        return res.status(200).send(req.query.validationToken);
-    }
+app.use(express.json());
 
-    // 🔁 Handle normal notifications (user created, deleted, etc.)
-    console.log("Received Azure AD Webhook:", JSON.stringify(req.body, null, 2));
-    res.sendStatus(202);
+// Webhook validation (GET)
+app.get("/webhooks/azure-ad-users", (req, res) => {
+  const validationToken = req.query.validationToken;
+  if (validationToken) {
+    console.log("Validation token received:", validationToken);
+    res.setHeader("Content-Type", "text/plain");
+    return res.status(200).send(validationToken);
+  }
+  res.status(400).send("Missing validationToken");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Webhook notification (POST)
+app.post("/webhooks/azure-ad-users", (req, res) => {
+  console.log("🔔 Webhook POST received!");
+  console.log(JSON.stringify(req.body, null, 2));
+  res.status(202).send("Accepted");
+});
+
+// Start server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Legacy server listening on port ${port}`);
+});
