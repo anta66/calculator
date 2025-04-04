@@ -17,6 +17,8 @@ app.get("/webhooks/azure-ad-users", (req, res) => {
 // Webhook notification (POST)
 app.post("/webhooks/azure-ad-users", (req, res) => {
   console.log("🔔 Webhook POST received!");
+  console.log("Webhook Notification Received:", req.body);
+  console.log("Webhook Notification Received:", res);
   console.log(JSON.stringify(req.body, null, 2));
   res.status(202).send("Accepted");
 });
