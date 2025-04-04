@@ -5,15 +5,15 @@ const app = express();
 app.use(bodyParser.json());
 
 app.post("/webhooks/azure-ad-users", (req, res) => {
-    if (req.body && req.body.validationToken) {
-        console.log("Validation request received:", req.body.validationToken);
-        return res.status(200).send(req.body.validationToken);  // 🔴 Important: Send back plain text token
+    if (req.query && req.query.validationToken) {
+        // ✅ Respond with the validation token as plain text (Microsoft expects this)
+        return res.status(200).send(req.query.validationToken);
     }
 
-    // Handle actual user created events
+    // 🔁 Handle normal notifications (user created, deleted, etc.)
     console.log("Received Azure AD Webhook:", JSON.stringify(req.body, null, 2));
     res.sendStatus(202);
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
